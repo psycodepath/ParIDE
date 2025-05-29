@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  valkey:
+    image: valkey/valkey:latest
+    container_name: paride_valkey_dev
+    ports:
+      - "127.0.0.1:6379:6379" # Bind to localhost for better security
+    volumes:
+      - valkey_data:/data # Persist Valkey data
+    # To use a custom valkey.conf:
+    # 1. Create a valkey.conf file in this directory (.devcontainer/valkey/valkey.conf)
+    # 2. Uncomment the following line:
+    # - ./valkey.conf:/usr/local/etc/valkey/valkey.conf
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s # Give Valkey time to start before first health check
+
+volumes:
+  valkey_data:
+    driver: local # Explicitly specify the local driver for Podman volumes
