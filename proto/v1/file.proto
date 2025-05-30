@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package paride.api.v1;
+
+option go_package = "github.com/psycodepath/paride/gen/paride_api_v1";
+
+// Import dependencies
+import "common.proto";
+
+// File operation messages
+message ListFilesRequest {
+  string session_id = 1;
+  string participant_id = 2;
+  string path_filter = 3;  // Optional filter pattern
+  bool include_hidden = 4;
+}
+
+message ListFilesResponse {
+  repeated FileInfo files = 1;
+  string workspace_root = 2;
+}
+
+message ReadFileRequest {
+  string session_id = 1;
+  string participant_id = 2;
+  string file_path = 3;
+  optional Range line_range = 4; // Optional for partial reading
+}
+
+message ReadFileResponse {
+  oneof content {
+    string text_chunk = 1;
+    bytes binary_chunk = 2;
+  }
+  bool is_final_chunk = 3;
+  string encoding = 4;
+  int64 total_size = 5;
+}
+
+// Editor command messages
+message EditorCommand {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  CommandPayloadSchema payload_schema = 4;
+  repeated string required_permissions = 5;
+  bool is_available = 6;
+}
+
+message CommandPayloadSchema {
+  string schema_type = 1; // "json", "string", "object"
+  string schema_definition = 2; // JSON schema or description
+  repeated CommandParameter parameters = 3;
+}
+
+message CommandParameter {
+  string name = 1;
+  string type = 2;
+  string description = 3;
+  bool is_required = 4;
+  string default_value = 5;
+}
+
+message ListEditorCommandsRequest {
+  string session_id = 1;
+  string participant_id = 2;
+  string editor_type = 3; // Filter by editor type
+}
+
+message ListEditorCommandsResponse {
+  repeated EditorCommand commands = 1;
+  string editor_type = 2;
+}

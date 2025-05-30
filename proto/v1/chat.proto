@@ -1,0 +1,174 @@
+syntax = "proto3";
+
+package paride.api.v1;
+
+option go_package = "github.com/psycodepath/paride/gen/paride_api_v1";
+
+// Import dependencies
+import "google/protobuf/timestamp.proto";
+import "common.proto";
+
+// Chat functionality messages
+message ChatSettings {
+  bool enable_chat = 1;
+  bool allow_code_snippets = 2;
+  bool allow_file_references = 3;
+  bool allow_reactions = 4;
+  bool allow_message_editing = 5;
+  bool allow_message_deletion = 6;
+  int32 max_message_length = 7;
+  int32 message_history_limit = 8; // Maximum messages to keep in history
+  bool observers_can_chat = 9;
+}
+
+// Chat message types
+message ChatMessage {
+  string id = 1;
+  string participant_id = 2;
+  string participant_name = 3;
+  string content = 4;
+  google.protobuf.Timestamp timestamp = 5;
+  ChatMessageType type = 6;
+  string reply_to_message_id = 7; // For threaded conversations
+  repeated ChatReaction reactions = 8;
+  bool is_system_message = 9;
+}
+
+enum ChatMessageType {
+  CHAT_MESSAGE_TYPE_UNSPECIFIED = 0;
+  CHAT_MESSAGE_TYPE_TEXT = 1;
+  CHAT_MESSAGE_TYPE_CODE_SNIPPET = 2;
+  CHAT_MESSAGE_TYPE_FILE_REFERENCE = 3;
+  CHAT_MESSAGE_TYPE_SYSTEM_NOTIFICATION = 4;
+  CHAT_MESSAGE_TYPE_ANNOUNCEMENT = 5;
+}
+
+message ChatReaction {
+  string participant_id = 1;
+  string participant_name = 2;
+  string emoji = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+message SendChatMessageRequest {
+  string session_id = 1;
+  string participant_id = 2;
+  string content = 3;
+  ChatMessageType type = 4;
+  string reply_to_message_id = 5; // Optional, for replies
+  ChatMessageContext context = 6; // Optional, for code snippets or file references
+}
+
+message ChatMessageContext {
+  oneof context_type {
+    CodeSnippetContext code_snippet = 1;
+    FileReferenceContext file_reference = 2;
+  }
+}
+
+message CodeSnippetContext {
+  string language = 1;
+  string file_path = 2; // Optional, if from a specific file
+  Range range = 3; // Optional, if referencing specific lines
+}
+
+message FileReferenceContext {
+  string file_path = 1;
+  Range range = 2; // Optional, for specific lines
+}
+
+message SendChatMessageResponse {
+  string message_id = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  bool success = 3;
+  string error_message = 4;
+}
+
+message GetChatHistoryRequest {
+  string session_id = 1;
+  string participant_id = 2;
+  int32 limit = 3; // Maximum number of messages to return
+  string before_message_id = 4; // For pagination
+  bool include_system_messages = 5;
+}
+
+message GetChatHistoryResponse {
+  repeated ChatMessage messages = 1;
+  bool has_more = 2; // True if there are more messages available
+  string next_page_token = 3; // For pagination
+}
+
+message ChatEventRequest {
+  string session_id = 1;
+  string participant_id = 2;
+  ChatEvent event = 3;
+}
+
+message ChatEventResponse {
+  oneof response {
+    ChatEventBroadcast broadcast = 1;
+    ChatEventError error = 2;
+    ChatEventAck acknowledgment = 3;
+  }
+}
+
+message ChatEvent {
+  string event_id = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  
+  oneof event_type {
+    SendMessageEvent send_message = 10;
+    ReactToMessageEvent react_to_message = 11;
+    DeleteMessageEvent delete_message = 12;
+    EditMessageEvent edit_message = 13;
+    TypingIndicatorEvent typing_indicator = 14;
+  }
+}
+
+message SendMessageEvent {
+  string content = 1;
+  ChatMessageType type = 2;
+  string reply_to_message_id = 3;
+  ChatMessageContext context = 4;
+}
+
+message ReactToMessageEvent {
+  string message_id = 1;
+  string emoji = 2;
+  bool remove_reaction = 3; // True to remove reaction, false to add
+}
+
+message DeleteMessageEvent {
+  string message_id = 1;
+  bool delete_for_everyone = 2; // If false, only hide for sender
+}
+
+message EditMessageEvent {
+  string message_id = 1;
+  string new_content = 2;
+}
+
+message TypingIndicatorEvent {
+  bool is_typing = 1;
+  string file_path = 2; // Optional context for what they're typing about
+}
+
+message ChatEventBroadcast {
+  string participant_id = 1;
+  ChatEvent event = 2;
+  repeated string recipient_ids = 3; // Empty means broadcast to all
+}
+
+message ChatEventError {
+  string event_id = 1;
+  ErrorCode error_code = 2;
+  string error_message = 3;
+  string details = 4;
+}
+
+message ChatEventAck {
+  string event_id = 1;
+  bool success = 2;
+  string message = 3;
+  string message_id = 4; // For newly created messages
+}

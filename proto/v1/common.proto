@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package paride.api.v1;
+
+option go_package = "github.com/psycodepath/paride/gen/paride_api_v1";
+
+// Import common types
+import "google/protobuf/timestamp.proto";
+
+// Common types
+message Position {
+  int32 line = 1;
+  int32 character = 2;
+}
+
+message Range {
+  Position start = 1;
+  Position end = 2;
+}
+
+message Participant {
+  string id = 1;
+  string name = 2;
+  ParticipantRole role = 3;
+  bool is_host = 4;
+  google.protobuf.Timestamp joined_at = 5;
+}
+
+enum ParticipantRole {
+  PARTICIPANT_ROLE_UNSPECIFIED = 0;
+  PARTICIPANT_ROLE_OBSERVER = 1;
+  PARTICIPANT_ROLE_CONTRIBUTOR = 2;
+  PARTICIPANT_ROLE_HOST = 3;
+}
+
+message FileInfo {
+  string path = 1;
+  int64 size = 2;
+  google.protobuf.Timestamp last_modified = 3;
+  bool is_directory = 4;
+  FilePermissions permissions = 5;
+  bool is_locked = 6;
+  string locked_by_participant = 7;
+}
+
+message FilePermissions {
+  bool can_read = 1;
+  bool can_write = 2;
+  bool can_delete = 3;
+}
+
+message CursorStyle {
+  string color = 1;
+  string participant_name = 2;
+}
+
+message ParticipantCursor {
+  string participant_id = 1;
+  string file_path = 2;
+  Position position = 3;
+  CursorStyle style = 4;
+}
+
+message ParticipantSelection {
+  string participant_id = 1;
+  string file_path = 2;
+  Range range = 3;
+  string color = 4;
+}
+
+message ParticipantTypingStatus {
+  string participant_id = 1;
+  bool is_typing = 2;
+  string context = 3; // Optional context for what they're typing about
+  google.protobuf.Timestamp last_activity = 4;
+}
+
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+  ERROR_CODE_SESSION_NOT_FOUND = 1;
+  ERROR_CODE_PARTICIPANT_NOT_FOUND = 2;
+  ERROR_CODE_PERMISSION_DENIED = 3;
+  ERROR_CODE_FILE_NOT_FOUND = 4;
+  ERROR_CODE_FILE_LOCKED = 5;
+  ERROR_CODE_INVALID_OPERATION = 6;
+  ERROR_CODE_CONFLICT_DETECTED = 7;
+  ERROR_CODE_COMMAND_NOT_FOUND = 8;
+  ERROR_CODE_INVALID_PAYLOAD = 9;
+  ERROR_CODE_SESSION_FULL = 10;
+  ERROR_CODE_AUTHENTICATION_FAILED = 11;
+  ERROR_CODE_MESSAGE_NOT_FOUND = 12;
+  ERROR_CODE_MESSAGE_TOO_LONG = 13;
+  ERROR_CODE_CHAT_DISABLED = 14;
+  ERROR_CODE_RATE_LIMITED = 15;
+}

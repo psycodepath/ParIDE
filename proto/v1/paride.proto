@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package paride.api.v1;
+
+option go_package = "github.com/psycodepath/paride/gen/paride_api_v1";
+
+// Import message definitions
+import "common.proto";
+import "session.proto";
+import "file.proto";
+import "chat.proto";
+import "edit.proto";
+
+// ParIDE service definition
+service ParIDEService {
+  // Session management
+  rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse);
+  rpc JoinSession(JoinSessionRequest) returns (JoinSessionResponse);
+  rpc LeaveSession(LeaveSessionRequest) returns (LeaveSessionResponse);
+  
+  // File operations
+  rpc ListFiles(ListFilesRequest) returns (ListFilesResponse);
+  rpc ReadFile(ReadFileRequest) returns (stream ReadFileResponse);
+  
+  // Editor commands
+  rpc ListEditorCommands(ListEditorCommandsRequest) returns (ListEditorCommandsResponse);
+  
+  // Chat functionality
+  rpc SendChatMessage(SendChatMessageRequest) returns (SendChatMessageResponse);
+  rpc GetChatHistory(GetChatHistoryRequest) returns (GetChatHistoryResponse);
+  rpc ChatEvents(stream ChatEventRequest) returns (stream ChatEventResponse);
+  
+  // Streaming edit events
+  rpc EditEvents(stream EditEventRequest) returns (stream EditEventResponse);
+}
+
+
