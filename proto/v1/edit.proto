@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package paride.api.v1;
+
+option go_package = "github.com/psycodepath/paride/gen/paride_api_v1";
+
+// Import dependencies
+import "google/protobuf/timestamp.proto";
+import "common.proto";
+
+// Edit event messages
+message EditEventRequest {
+  string session_id = 1;
+  string participant_id = 2;
+  EditEvent event = 3;
+}
+
+message EditEventResponse {
+  oneof response {
+    EditEventBroadcast broadcast = 1;
+    EditEventError error = 2;
+    EditEventAck acknowledgment = 3;
+  }
+}
+
+message EditEvent {
+  string event_id = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  
+  oneof event_type {
+    MoveCursorEvent move_cursor = 10;
+    InsertTextEvent insert_text = 11;
+    SelectRangeEvent select_range = 12;
+    UnselectRangeEvent unselect_range = 13;
+    ExecuteCommandEvent execute_command = 14;
+    CreateFileEvent create_file = 15;
+    RemoveFileEvent remove_file = 16;
+    FileRenamedEvent file_renamed = 17;
+    FileMoveEvent file_move = 18;
+  }
+}
+
+message MoveCursorEvent {
+  string file_path = 1;
+  Position position = 2;
+  CursorStyle style = 3;
+}
+
+message InsertTextEvent {
+  string file_path = 1;
+  Position position = 2;
+  string text = 3;
+  string operation_id = 4; // For conflict resolution
+}
+
+message SelectRangeEvent {
+  string file_path = 1;
+  Range range = 2;
+  string selection_id = 3;
+  string color = 4;
+  bool is_multiple_selection = 5;
+}
+
+message UnselectRangeEvent {
+  string file_path = 1;
+  oneof target {
+    string selection_id = 2;
+    Range range = 3;
+  }
+  bool clear_all_selections = 4;
+}
+
+message ExecuteCommandEvent {
+  string command_id = 1;
+  string payload = 2; // JSON-encoded command parameters
+  string target_file = 3; // Optional, if command targets specific file
+}
+
+message CreateFileEvent {
+  string file_path = 1;
+  bool is_directory = 2;
+  string initial_content = 3; // For files only
+}
+
+message RemoveFileEvent {
+  string file_path = 1;
+  bool confirm_deletion = 2;
+  bool create_backup = 3;
+}
+
+message FileRenamedEvent {
+  string old_file_path = 1;
+  string new_file_path = 2;
+  bool preserve_content = 3; // Whether to preserve file content during rename
+}
+
+message FileMoveEvent {
+  string source_path = 1;
+  string destination_path = 2;
+  bool copy_instead_of_move = 3; // If true, copy file instead of moving
+  bool overwrite_if_exists = 4; // Whether to overwrite destination if it exists
+}
+
+message EditEventBroadcast {
+  string participant_id = 1;
+  EditEvent event = 2;
+  repeated string recipient_ids = 3; // Empty means broadcast to all
+}
+
+message EditEventError {
+  string event_id = 1;
+  ErrorCode error_code = 2;
+  string error_message = 3;
+  string details = 4;
+}
+
+message EditEventAck {
+  string event_id = 1;
+  bool success = 2;
+  string message = 3;
+}
