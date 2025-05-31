@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package paride_api_v1;
+
+option go_package = "github.com/psyocdepath/paride/proto/paride_api_v1";
+
+// Token represents an authentication token, typically a JWT.
+message Token {
+    string value = 1;
+}
+
+// LoginRequest contains the credentials for a user to log in.
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+    string display_name = 3; // Optional display name for the user
+}
+
+// LoginResponse contains the JWT token.
+message LoginResponse {
+    Token token = 1;
+}

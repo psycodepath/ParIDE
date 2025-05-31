@@ -1,0 +1,33 @@
+syntax = "proto3";
+package paride_api_v1;
+
+option go_package = "github.com/psyocdepath/paride/proto/paride_api_v1";
+
+import "google/protobuf/empty.proto";
+import "paride_api_v1/shared.proto";
+import "paride_api_v1/session.proto";
+
+
+service Api {
+    // Login obtains a JWT token for a user.
+    rpc Login(LoginRequest) returns (LoginResponse);
+
+    // CreateSession creates a new collaborative session.
+    rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse);
+
+    // StopSession stops an active collaborative session.
+    // Only the host or an administrator should be able to call this.
+    rpc StopSession(StopSessionRequest) returns (google.protobuf.Empty);
+
+    // JoinSession allows a user to join a session using an invite token.
+    rpc JoinSession(JoinSessionRequest) returns (JoinSessionResponse);
+
+    // LeaveSession allows a participant to leave a session.
+    rpc LeaveSession(LeaveSessionRequest) returns (google.protobuf.Empty);
+
+    // ReconnectSession allows a participant to reconnect to a session they were part of.
+    rpc ReconnectSession(ReconnectSessionRequest) returns (ReconnectSessionResponse);
+
+    // SetParticipantAccess allows the host of a session to set read/write access for a participant.
+    rpc SetParticipantAccess(SetParticipantAccessRequest) returns (google.protobuf.Empty);
+}

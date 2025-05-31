@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package paride_api_v1;
+
+import "paride_api_v1/shared.proto"; // Import to use the Token message
+
+option go_package = "github.com/psyocdepath/paride/proto/paride_api_v1";
+
+// AccessLevel defines the permission level for a participant in a session.
+enum AccessLevel {
+    ACCESS_LEVEL_UNSPECIFIED = 0;
+    READ_ONLY = 1;
+    READ_WRITE = 2;
+}
+
+// CreateSessionRequest allows specifying options for a new session.
+message CreateSessionRequest {
+    Token jwt_token = 1; // JWT token for authentication
+    string session_name = 2; // Optional name for the session
+}
+
+// CreateSessionResponse returns details of the created session.
+message CreateSessionResponse {
+    string session_id = 1;
+    string invite_token = 2;
+}
+
+// StopSessionRequest specifies the session to be stopped.
+message StopSessionRequest {
+    Token jwt_token = 1; // JWT token for authentication
+    string session_id = 2;
+}
+
+// JoinSessionRequest contains the token to join a session.
+message JoinSessionRequest {
+    Token jwt_token = 1; // JWT token for authentication
+    string invite_token = 2;
+    string display_name = 3; // Optional display name for the participant in this session
+}
+
+// JoinSessionResponse returns details upon successfully joining a session.
+message JoinSessionResponse {
+    string session_id = 1;
+    string participant_id = 2; // Unique identifier for the participant in this session
+}
+
+// LeaveSessionRequest specifies the session to leave.
+// Assumes participant identity is known via context (e.g., auth token).
+message LeaveSessionRequest {
+    Token jwt_token = 1; // JWT token for authentication
+    string session_id = 2;
+}
+
+// ReconnectSessionRequest allows a participant to reconnect to an existing session.
+message ReconnectSessionRequest {
+    Token jwt_token = 1; // JWT token for authentication
+    string session_id = 2;
+    // A token or ID previously assigned to the participant for this session,
+    // allowing them to prove their identity for reconnection.
+    string participant_token = 3;
+}
+
+// ReconnectSessionResponse confirms the outcome of a reconnection attempt.
+message ReconnectSessionResponse {
+    bool success = 1;
+    string session_id = 2;
+    string participant_id = 3;
+}
+
+// SetParticipantAccessRequest allows the host to set access rights for a participant.
+message SetParticipantAccessRequest {
+    Token jwt_token = 1; // JWT token for authentication
+    string session_id = 2;
+    string target_participant_id = 3;
+    AccessLevel access = 4;
+}
