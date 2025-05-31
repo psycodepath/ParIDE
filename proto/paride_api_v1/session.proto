@@ -4,7 +4,7 @@ package paride_api_v1;
 
 import "paride_api_v1/shared.proto"; // Import to use the Token message
 
-option go_package = "github.com/psyocdepath/paride/proto/paride_api_v1";
+option go_package = "github.com/psyocdepath/paride/pkg/proto/paride_api_v1";
 
 // AccessLevel defines the permission level for a participant in a session.
 enum AccessLevel {
